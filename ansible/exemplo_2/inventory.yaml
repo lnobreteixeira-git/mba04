@@ -4,7 +4,9 @@ all:
       ansible_become: 'yes'
       ansible_become_method: 'sudo'
       mba: 'Impacta'
-
+      turma: '04'
+      name_var: 'impacta_app'
+      tag: '1.0'
 local:
    vars:
       var_do_inventory: 'Inv-Var'

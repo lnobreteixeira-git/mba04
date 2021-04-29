@@ -3,23 +3,22 @@
   debugger: on_skipped
 
   tasks:
-  - name: Instalando docker
+  - name: Instalando docker e o compose juntos
     apt:
-      name: docker.io
+      name: "{{ item }}"
       update_cache: yes
       state: present
-  
-  - name: Instalando docker-compose
-    apt:
-      name: docker-compose
-      update_cache: yes
-      state: present
+
+    with_items:
+     - docker.io
+     - docker-compose
 
   - name: Habilitar docker no boot
     service:
         name: docker
         enabled: yes
         state: started
+          
 
   - name: Copiando artefatos para o servidor
     copy:
@@ -31,16 +30,23 @@
       - docker-compose.yml
       - Dockerfile
       - app.py
-      - requirements.txt 
-
-  - name: Construindo a imagem
-    command: docker build -t impacta_app:1.0 .
-    args:
-       chdir: /root/
-    register: docker_build
+      - requirements.txt
   
+  - name: construindo a imagem usando extra vars
+    docker_image:
+        name: "{{ XVAR }}"
+        force_tag: yes 
+        source: build    
+        build:
+        path: /root/
+    register: docker_build
+    tags:
+      - docker-build
+
   - name: Executando o docker-compose
     command: docker-compose up -d
     args:
        chdir: /root/
+    environment:
+       name_var: "{{ name_var }}"   
     register: docker_compose_up
